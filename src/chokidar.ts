@@ -30,10 +30,13 @@ watcher
           if (previousSize === currentSize) {
             clearInterval(checkInterval);
 
-            console.log("Starting parsing process");
-
             // Trigger parsing process
+            console.log(`TESTING | filePath var equals ${filePath}`);
+            console.log(
+              `TESTING | check if filePath is the same as when it got detected above`
+            );
             const parserProcess = spawn("node", [parserScript, filePath]);
+            console.log("Starting parsing process");
 
             parserProcess.on("exit", (code, signal) => {
               if (code === 0) {
