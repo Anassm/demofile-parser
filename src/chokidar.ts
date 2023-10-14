@@ -3,8 +3,8 @@ import path from "path";
 import { spawn } from "child_process";
 import fs from "fs";
 
-const demoDirectory = "PLACEHOLDER";
-const parserScript = path.join(__dirname, "parser.ts");
+const demoDirectory = "C:/Users/amous/Desktop/demos";
+const parserScript = path.join(__dirname, "parser.js");
 
 const watcher = chokidar.watch(demoDirectory, {
   ignored: /(^|[/\\])\../,
@@ -35,6 +35,8 @@ watcher
             console.log(
               `TESTING | check if filePath is the same as when it got detected above`
             );
+
+            console.log(`TESTING | parserScript path is ${parserScript}`);
             const parserProcess = spawn("node", [parserScript, filePath]);
             console.log("Starting parsing process");
 
@@ -51,7 +53,7 @@ watcher
           } else {
             previousSize = currentSize;
           }
-        }, 4000);
+        }, 3000);
       }
     }
   })

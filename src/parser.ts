@@ -1,9 +1,9 @@
 import fs from "fs";
-import demofile from "demofile";
+import { DemoFile } from "demofile";
 import path from "path";
 
 const demoFilePath = process.argv[2];
-const demoFile = new demofile.DemoFile();
+const demoFile = new DemoFile();
 
 demoFile.on("start", () => {
   console.log("Parsing demo file...");
