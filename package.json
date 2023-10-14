@@ -1,0 +1,18 @@
+{
+  "name": "demofile-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.8.4",
+    "chokidar": "^3.5.3",
+    "demofile": "^2.10.0",
+    "typescript": "^5.2.2"
+  }
+}
