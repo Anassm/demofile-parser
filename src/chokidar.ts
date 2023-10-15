@@ -1,64 +1,96 @@
 import chokidar from "chokidar";
 import path from "path";
-import { spawn } from "child_process";
+import { ChildProcess, spawn } from "child_process";
 import fs from "fs";
+import { log, logError } from "./logger";
+import { configDotenv } from "dotenv";
 
-const demoDirectory = "C:/Users/amous/Desktop/demos";
-const parserScript = path.join(__dirname, "parser.js");
+const envPath = path.resolve(__dirname, "../.env");
+configDotenv({ path: envPath });
+
+const demoDirectory: string = process.env.DEMOS_DIRECTORY as string;
+const parserScript: string = path.join(__dirname, "parser.js");
+let isParsing: boolean = false;
+const parseQueue: string[] = [];
 
 const watcher = chokidar.watch(demoDirectory, {
   ignored: /(^|[/\\])\../,
   persistent: true,
+  ignoreInitial: true,
 });
 
-let isParsing = false;
-
 watcher
-  .on("add", (filePath) => {
+  .on("add", (filePath: string) => {
+    const fileName = path.basename(filePath);
+
     if (filePath.endsWith(".dem")) {
-      console.log(`New demo file detected: ${filePath}`);
+      log(`New demo file detected: ${fileName}`);
+      parseQueue.push(filePath);
+      processQueue();
 
-      if (!isParsing) {
-        isParsing = true;
+      function processQueue() {
+        if (!isParsing && parseQueue.length > 0) {
+          const filePath = parseQueue.shift();
 
-        console.log(`Waiting for demo to be ready...`);
+          if (filePath) {
+            isParsing = true;
 
-        let previousSize = 0;
-        let checkInterval = setInterval(() => {
-          const currentSize = fs.statSync(filePath).size;
+            log(`Waiting for demo to be ready`, fileName);
 
-          if (previousSize === currentSize) {
-            clearInterval(checkInterval);
+            let previousSize: number = 0;
+            let checkInterval = setInterval(() => {
+              const currentSize: number = fs.statSync(filePath).size;
 
-            // Trigger parsing process
-            console.log(`TESTING | filePath var equals ${filePath}`);
-            console.log(
-              `TESTING | check if filePath is the same as when it got detected above`
-            );
+              if (previousSize === currentSize) {
+                clearInterval(checkInterval);
 
-            console.log(`TESTING | parserScript path is ${parserScript}`);
-            const parserProcess = spawn("node", [parserScript, filePath]);
-            console.log("Starting parsing process");
+                // Trigger parsing process
+                const parserProcess: ChildProcess = spawn("node", [
+                  parserScript,
+                  filePath,
+                ]);
+                log("Starting parsing process", fileName);
 
-            parserProcess.on("exit", (code, signal) => {
-              if (code === 0) {
-                console.log("Parsing process completed successfully.");
-              } else {
-                console.error(
-                  `Parsing process exited with code ${code} and signal ${signal}`
+                parserProcess.on(
+                  "exit",
+                  (code: number, signal: string | null) => {
+                    if (code === 0) {
+                      log(
+                        "Demo parsed successfully, JSON file added to directory",
+                        fileName
+                      );
+                      log(
+                        `Watching directory for new demo files: ${demoDirectory}`
+                      );
+                    } else {
+                      logError(
+                        `Parsing process exited with code ${code} and signal ${
+                          signal || "unknown"
+                        }`,
+                        fileName
+                      );
+                    }
+                    isParsing = false;
+                    processQueue();
+                  }
                 );
+              } else {
+                previousSize = currentSize;
               }
-              isParsing = false;
-            });
-          } else {
-            previousSize = currentSize;
+            }, 3000);
           }
-        }, 3000);
+        }
       }
     }
   })
-  .on("error", (error) => {
-    console.error(`Watcher error: ${error}`);
+  .on("error", (error: Error) => {
+    logError(`Watcher error: ${error.message}`);
   });
 
-console.log(`Watching directory: ${demoDirectory}`);
+if (demoDirectory) {
+  log(`Watching directory: ${demoDirectory}`);
+} else {
+  logError(
+    "DEMO_DIRECTORY environment variable most likely not set in your .env file."
+  );
+}
