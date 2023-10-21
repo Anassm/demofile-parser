@@ -1,5 +1,5 @@
 import fs from "fs";
-import { DemoFile, Player } from "demofile";
+import { DemoFile, Player, TeamNumber } from "demofile";
 import path from "path";
 import { log, logError } from "./logger";
 
@@ -13,7 +13,16 @@ demoFile.on("start", () => {
 
 demoFile.on("end", () => {
   const players: Player[] = demoFile.entities.players.slice();
-  const extractedData: { name: string; steamId: string }[] = players.map(
+
+  let matchData: {
+    ctScore: number;
+    tScore: number;
+  } = {
+    ctScore: demoFile.teams[TeamNumber.CounterTerrorists].score,
+    tScore: demoFile.teams[TeamNumber.Terrorists].score,
+  };
+
+  const playerData: { name: string; steamId: string }[] = players.map(
     (player: Player) => ({
       name: player.name,
       steamId: player.steamId,
@@ -27,6 +36,11 @@ demoFile.on("end", () => {
   );
 
   try {
+    const extractedData = {
+      matchData: matchData,
+      players: playerData,
+    };
+
     fs.writeFileSync(jsonFilePath, JSON.stringify(extractedData, null, 2));
     log(`Demo file successfully parsed.`, fileName);
     log(`Data saved to: ${jsonFilePath}`, fileName);

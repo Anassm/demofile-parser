@@ -77,7 +77,7 @@ watcher
               } else {
                 previousSize = currentSize;
               }
-            }, 3000);
+            }, 60000);
           }
         }
       }

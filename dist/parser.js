@@ -15,13 +15,21 @@ demoFile.on("start", () => {
 });
 demoFile.on("end", () => {
     const players = demoFile.entities.players.slice();
-    const extractedData = players.map((player) => ({
+    let matchData = {
+        ctScore: demoFile.teams[3 /* TeamNumber.CounterTerrorists */].score,
+        tScore: demoFile.teams[2 /* TeamNumber.Terrorists */].score,
+    };
+    const playerData = players.map((player) => ({
         name: player.name,
         steamId: player.steamId,
     }));
     const jsonFileName = path_1.default.basename(demoFilePath, ".dem") + ".json";
     const jsonFilePath = path_1.default.join(path_1.default.dirname(demoFilePath), jsonFileName);
     try {
+        const extractedData = {
+            matchData: matchData,
+            players: playerData,
+        };
         fs_1.default.writeFileSync(jsonFilePath, JSON.stringify(extractedData, null, 2));
         (0, logger_1.log)(`Demo file successfully parsed.`, fileName);
         (0, logger_1.log)(`Data saved to: ${jsonFilePath}`, fileName);
