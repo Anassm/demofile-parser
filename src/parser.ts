@@ -14,7 +14,9 @@ demoFile.on("start", () => {
 demoFile.on("end", () => {
   const players: Player[] = demoFile.entities.players.slice();
 
-  let matchData: {
+  const mapName: string = demoFile.header.mapName;
+
+  const matchData: {
     ctScore: number;
     tScore: number;
   } = {
@@ -39,6 +41,7 @@ demoFile.on("end", () => {
     const extractedData = {
       matchData: matchData,
       players: playerData,
+      mapName: mapName,
     };
 
     fs.writeFileSync(jsonFilePath, JSON.stringify(extractedData, null, 2));
