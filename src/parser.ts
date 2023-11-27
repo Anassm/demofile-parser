@@ -13,9 +13,7 @@ demoFile.on("start", () => {
 
 demoFile.on("end", () => {
   const players: Player[] = demoFile.entities.players.slice();
-
   const mapName: string = demoFile.header.mapName;
-
   const matchData: {
     ctScore: number;
     tScore: number;
@@ -23,13 +21,13 @@ demoFile.on("end", () => {
     ctScore: demoFile.teams[TeamNumber.CounterTerrorists].score,
     tScore: demoFile.teams[TeamNumber.Terrorists].score,
   };
-
   const playerData: { name: string; steamId: string }[] = players.map(
     (player: Player) => ({
       name: player.name,
       steamId: player.steamId,
     })
   );
+  const demoFileName: string = fileName;
 
   const jsonFileName: string = path.basename(demoFilePath, ".dem") + ".json";
   const jsonFilePath: string = path.join(
@@ -42,6 +40,7 @@ demoFile.on("end", () => {
       matchData: matchData,
       players: playerData,
       mapName: mapName,
+      demoFileName: demoFileName,
     };
 
     fs.writeFileSync(jsonFilePath, JSON.stringify(extractedData, null, 2));
